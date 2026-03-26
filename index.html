@@ -188,11 +188,12 @@ function endGame() {
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
 
   // 破紀錄特效
-  if(count > highScore){
+if(count > highScore){
     highScore = count;
     highScoreEl.innerText = `歷史最高分: ${highScore}`;
     highScoreEl.classList.add("flash");
     gameTitle.style.transform = "scale(1.3)";
+
     let bonusEl = document.createElement('div');
     bonusEl.innerText = '🎉 新紀錄！ 🎉';
     bonusEl.className = 'bonusText';
@@ -200,14 +201,38 @@ function endGame() {
     bonusEl.style.top = '50%';
     bonusEl.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(bonusEl);
+
+    // 延長新紀錄特效停留時間到 2 秒
     setTimeout(() => {
-      highScoreEl.classList.remove("flash");
-      gameTitle.style.transform = "scale(1)";
-      bonusEl.remove();
-    }, 1000);
-  }
+        highScoreEl.classList.remove("flash");
+        gameTitle.style.transform = "scale(1)";
+        bonusEl.remove();
+    }, 2000);
 }
 
+// 每 10 的倍數特效
+if(count % 10 === 0){
+    const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
+    let index = Math.min(Math.floor(count / 10) - 1, messages.length - 1);
+    let text = messages[index];
+
+    countEl.style.color = '#00ffff';
+    countEl.style.transform = 'scale(2)';
+
+    let bonusEl = document.createElement('div');
+    bonusEl.innerText = text;
+    bonusEl.className = 'bonusText';
+    bonusEl.style.left = `${e.pageX}px`;
+    bonusEl.style.top = `${e.pageY - 50}px`;
+    document.body.appendChild(bonusEl);
+
+    setTimeout(() => {
+        countEl.style.color = '#000';
+        countEl.style.transform = 'scale(1)';
+        bonusEl.remove();
+    }, 800); // 留更久一點
+}
+  
 // 點擊事件
 document.addEventListener("click", function(e){
   if(playing){
