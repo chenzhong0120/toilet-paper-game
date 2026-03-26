@@ -188,7 +188,7 @@ function endGame() {
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
 
   // 破紀錄特效
-if(count > highScore){
+  if(count > highScore){
     highScore = count;
     highScoreEl.innerText = `歷史最高分: ${highScore}`;
     highScoreEl.classList.add("flash");
@@ -208,31 +208,9 @@ if(count > highScore){
         gameTitle.style.transform = "scale(1)";
         bonusEl.remove();
     }, 2000);
+  }
 }
 
-// 每 10 的倍數特效
-if(count % 10 === 0){
-    const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
-    let index = Math.min(Math.floor(count / 10) - 1, messages.length - 1);
-    let text = messages[index];
-
-    countEl.style.color = '#00ffff';
-    countEl.style.transform = 'scale(2)';
-
-    let bonusEl = document.createElement('div');
-    bonusEl.innerText = text;
-    bonusEl.className = 'bonusText';
-    bonusEl.style.left = `${e.pageX}px`;
-    bonusEl.style.top = `${e.pageY - 50}px`;
-    document.body.appendChild(bonusEl);
-
-    setTimeout(() => {
-        countEl.style.color = '#000';
-        countEl.style.transform = 'scale(1)';
-        bonusEl.remove();
-    }, 800); // 留更久一點
-}
-  
 // 點擊事件
 document.addEventListener("click", function(e){
   if(playing){
@@ -249,7 +227,7 @@ document.addEventListener("click", function(e){
     setTimeout(() => {
       tpImg.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180";
       tpImg.classList.remove("pull");
-    }, 300); // 停留久一點
+    }, 300); 
 
     // +1 飄字
     let addEl = document.createElement('div');
@@ -260,21 +238,27 @@ document.addEventListener("click", function(e){
     document.body.appendChild(addEl);
     setTimeout(() => addEl.remove(), 500);
 
-    // 每10的倍數特效
+    // 每10的倍數特效 (漸進式文字)
     if(count % 10 === 0){
+      const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
+      let index = Math.min(Math.floor(count / 10) - 1, messages.length - 1);
+      let text = messages[index];
+
       countEl.style.color = '#00ffff';
       countEl.style.transform = 'scale(2)';
+
       let bonusEl = document.createElement('div');
-      bonusEl.innerText = 'BONUS!';
+      bonusEl.innerText = text;
       bonusEl.className = 'bonusText';
       bonusEl.style.left = `${e.pageX}px`;
       bonusEl.style.top = `${e.pageY - 50}px`;
       document.body.appendChild(bonusEl);
+
       setTimeout(() => {
-        countEl.style.color = '#000';
-        countEl.style.transform = 'scale(1)';
-        bonusEl.remove();
-      }, 500);
+          countEl.style.color = '#000';
+          countEl.style.transform = 'scale(1)';
+          bonusEl.remove();
+      }, 800);
     }
 
     // 播放音效
