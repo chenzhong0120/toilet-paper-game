@@ -5,7 +5,7 @@
 <title>滾筒衛生紙遊戲</title>
 <style>
   body {
-  background: url("https://tse1.mm.bing.net/th/id/OIP._0SI8LsLit4HWUkJDdWqFgHaEo?pid=Api&P=0&h=180") no-repeat center center fixed;
+  background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
   background-size: cover;
   font-family: sans-serif;
   text-align: center;
@@ -62,7 +62,7 @@
 <div id="result"></div>
 <button onclick="startGame()">再玩一次</button>
 
-<audio id="sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<audio id="sound" src="sound.mp3"></audio>
 
 <script>
 let count = 0;
@@ -113,7 +113,7 @@ document.addEventListener("contextmenu", function(e){
 
     // 播放音效
     sound.currentTime = 0;
-    sound.play();
+    sound.play().catch(e => console.log("播放失敗:", e));
   }
 });
 
