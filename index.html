@@ -1,45 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-  <title>衛生紙挑戰</title>
+<meta charset="UTF-8">
+<title>滾筒衛生紙遊戲</title>
+<style>
+  body {
+    background: linear-gradient(to bottom, #fefcea, #f1da36);
+    font-family: sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    margin-top: 20px;
+    color: #333;
+  }
+
+  #count {
+    font-size: 60px;
+    margin: 20px 0;
+    transition: transform 0.1s;
+  }
+
+  #count.click {
+    transform: scale(1.3);
+    color: #ff4500;
+  }
+
+  #timer {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+
+  #result {
+    font-size: 30px;
+    margin: 20px 0;
+    color: #006400;
+  }
+
+  button {
+    font-size: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+
+  #tpImage {
+    width: 150px;
+    margin-top: 20px;
+  }
+</style>
 </head>
-<body style="text-align:center; font-family:sans-serif;">
+<body>
 
-<h1>🧻 衛生紙狂拉挑戰</h1>
-<p>剩餘時間: <span id="time">10</span> 秒</p>
-<p>已拉張數: <span id="count">0</span></p>
+<h1>滾筒衛生紙挑戰</h1>
+<img id="tpImage" src="https://i.imgur.com/O4b1P9T.png" alt="衛生紙">
 
-<button id="start">開始</button>
+<div id="timer">時間: 10 秒</div>
+<div id="count">0</div>
+<div id="result"></div>
+<button onclick="startGame()">再玩一次</button>
+
+<audio id="sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
 
 <script>
 let count = 0;
 let time = 10;
 let playing = false;
+let timerInterval;
 
-document.addEventListener("contextmenu", function(e){
-    e.preventDefault(); // 禁止右鍵選單
-    if(playing){
-        count++;
-        document.getElementById("count").innerText = count;
+const countEl = document.getElementById("count");
+const timerEl = document.getElementById("timer");
+const resultEl = document.getElementById("result");
+const sound = document.getElementById("sound");
+
+function startGame() {
+  count = 0;
+  time = 10;
+  playing = true;
+  countEl.innerText = count;
+  resultEl.innerText = '';
+  timerEl.innerText = `時間: ${time} 秒`;
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    time--;
+    timerEl.innerText = `時間: ${time} 秒`;
+    if(time <= 0){
+      endGame();
     }
+  }, 1000);
+}
+
+function endGame() {
+  playing = false;
+  clearInterval(timerInterval);
+  const cps = (count / 10).toFixed(2);
+  resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
+}
+
+// 右鍵點擊
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+  if(playing){
+    count++;
+    countEl.innerText = count;
+
+    // 點擊動畫
+    countEl.classList.add("click");
+    setTimeout(() => countEl.classList.remove("click"), 100);
+
+    // 播放音效
+    sound.currentTime = 0;
+    sound.play();
+  }
 });
 
-document.getElementById("start").onclick = function(){
-    count = 0;
-    time = 10;
-    playing = true;
-
-    let timer = setInterval(() => {
-        time--;
-        document.getElementById("time").innerText = time;
-
-        if(time <= 0){
-            clearInterval(timer);
-            playing = false;
-            alert("時間到！你拉了 " + count + " 張！");
-        }
-    }, 1000);
-};
+// 自動開始遊戲
+startGame();
 </script>
 
 </body>
