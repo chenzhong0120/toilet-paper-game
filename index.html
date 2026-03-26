@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>衛生紙挑戰</title>
+</head>
+<body style="text-align:center; font-family:sans-serif;">
+
+<h1>🧻 衛生紙狂拉挑戰</h1>
+<p>剩餘時間: <span id="time">10</span> 秒</p>
+<p>已拉張數: <span id="count">0</span></p>
+
+<button id="start">開始</button>
+
+<script>
+let count = 0;
+let time = 10;
+let playing = false;
+
+document.addEventListener("contextmenu", function(e){
+    e.preventDefault(); // 禁止右鍵選單
+    if(playing){
+        count++;
+        document.getElementById("count").innerText = count;
+    }
+});
+
+document.getElementById("start").onclick = function(){
+    count = 0;
+    time = 10;
+    playing = true;
+
+    let timer = setInterval(() => {
+        time--;
+        document.getElementById("time").innerText = time;
+
+        if(time <= 0){
+            clearInterval(timer);
+            playing = false;
+            alert("時間到！你拉了 " + count + " 張！");
+        }
+    }, 1000);
+};
+</script>
+
+</body>
+</html>
