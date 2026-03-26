@@ -126,9 +126,16 @@ document.addEventListener("click", function(e){
     count++;
     countEl.innerText = count;
 
+    // 點擊動畫
     countEl.classList.add("click");
     setTimeout(() => countEl.classList.remove("click"), 100);
 
+    // 圖片切換
+    const tpImg = document.getElementById("tpImage");
+    tpImg.src = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000b5987209a6554ccbf9fd05e7&ts=492926&p=fs&cid=1&sig=ad4e88266430531bee93c4e525ca0d160af5dde7b29f26a72f8faee97e63ff83&v=0";  // 換成被拉出的衛生紙
+    setTimeout(() => tpImg.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180", 150); // 0.15秒後還原
+
+    // 播放音效
     sound.currentTime = 0;
     sound.play().catch(e => console.log("音效播放失敗:", e));
   }
