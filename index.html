@@ -56,7 +56,8 @@
 
 <h1>滾筒衛生紙挑戰</h1>
 <img id="tpImage" src="https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180" alt="衛生紙">
-
+  
+<div id="highScore">歷史最高分: 0</div>
 <div id="timer">時間: 10 秒</div>
 <div id="count">0</div>
 <div id="result"></div>
@@ -70,6 +71,8 @@ let count = 0;
 let time = 10;
 let playing = false;
 let timerInterval;
+let highScore = localStorage.getItem('tpHighScore') || 0;
+document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
 
 const countEl = document.getElementById("count");
 const timerEl = document.getElementById("timer");
@@ -108,6 +111,13 @@ function endGame() {
   clearInterval(timerInterval);
   const cps = (count / 10).toFixed(2);
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
+
+  // 更新最高分
+  if(count > highScore){
+    highScore = count;
+    localStorage.setItem('tpHighScore', highScore);
+    document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
+  }
 }
 
 // 左鍵點擊衛生紙
