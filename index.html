@@ -7,7 +7,7 @@
   body {
     background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
     background-size: cover;
-    font-family: sans-serif;
+    font-family: 'Comic Sans MS', sans-serif;
     text-align: center;
     margin: 0;
     user-select: none;
@@ -15,7 +15,7 @@
 
   #gameTitle {
     font-size: 50px;
-    background: linear-gradient(90deg, orange, red);
+    background: linear-gradient(90deg, #ff8c00, #ffa500, #ff4500);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -23,11 +23,17 @@
   #tpImage {
     width: 150px;
     margin-top: 20px;
+    transition: transform 0.1s;
   }
 
   #count {
     font-size: 60px;
     margin: 20px;
+  }
+
+  #boost {
+    font-size: 24px;
+    color: #00ffff;
   }
 
   .addScore, .bonusText {
@@ -38,13 +44,13 @@
   }
 
   .addScore {
-    color: yellow;
+    color: #ffdd00;
     text-shadow: 2px 2px 4px black;
     font-size: 30px;
   }
 
   .bonusText {
-    color: cyan;
+    color: #00ffff;
     font-size: 36px;
   }
 
@@ -63,6 +69,7 @@
 
 <div id="timer">時間: 10 秒</div>
 <div id="count">0</div>
+<div id="boost">倍率: x1</div>
 <div id="result"></div>
 
 <button onclick="startGame()">開始遊戲</button>
@@ -77,16 +84,20 @@ let count = 0;
 let time = 10;
 let playing = false;
 let timer;
+let boost = 1;
 
 const countEl = document.getElementById("count");
+const boostEl = document.getElementById("boost");
 const tpImg = document.getElementById("tpImage");
 const bonusSound = document.getElementById("bonusSound");
 
 function startGame(){
   count = 0;
   time = 10;
+  boost = 1;
   playing = true;
   countEl.innerText = count;
+  boostEl.innerText = "倍率: x1";
 
   timer = setInterval(()=>{
     time--;
@@ -108,7 +119,7 @@ function addPoint(x, y, value=1){
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),600);
 
-  // 圖片動畫
+  // 衛生紙動畫
   tpImg.style.transform = "translateY(20px)";
   setTimeout(()=>tpImg.style.transform="translateY(0)",100);
 
@@ -130,31 +141,32 @@ function addPoint(x, y, value=1){
   }
 }
 
-// 左鍵
+// 左鍵（吃倍率🔥）
 document.addEventListener("click", e=>{
-  if(playing) addPoint(e.pageX, e.pageY, 1);
+  if(playing){
+    let gain = Math.floor(boost);
+    addPoint(e.pageX, e.pageY, gain);
+    boost = 1; // 用掉
+    boostEl.innerText = "倍率: x1";
+  }
 });
 
-// 右鍵（弱技能）
-document.addEventListener("contextmenu", e=>{
-  e.preventDefault();
-  if(playing) addPoint(e.pageX, e.pageY, 2);
-});
-
-// 滾輪（主玩法🔥）
+// 滾輪（充能）
 document.addEventListener("wheel", e=>{
   e.preventDefault();
-
   if(playing){
-    let power = Math.min(Math.abs(e.deltaY)/50,5);
-    let gain = Math.floor(power) || 1;
-
-    if(e.deltaY > 0){
-      addPoint(window.innerWidth/2, window.innerHeight/2, gain);
-    }
+    boost = Math.min(boost + 0.5, 3); // 上限x3
+    boostEl.innerText = `倍率: x${boost.toFixed(1)}`;
   }
 },{passive:false});
 
+// 右鍵（小加成）
+document.addEventListener("contextmenu", e=>{
+  e.preventDefault();
+  if(playing){
+    addPoint(e.pageX, e.pageY, 2);
+  }
+});
 </script>
 
 </body>
