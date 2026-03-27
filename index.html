@@ -3,220 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <title>滾筒衛生紙遊戲</title>
-
 <style>
-body {
-  background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
-  background-size: cover;
-  font-family: sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  user-select: none;
-}
+  body {
+    background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
+    background-size: cover;
+    font-family: sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
 
-#gameTitle {
-  font-size: 50px;
-  background: linear-gradient(90deg, #ff8c00, #ffa500, #ff4500);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-  margin-top: 20px;
-}
+  h1 {
+    margin-top: 20px;
+    color: #333;
+    font-size: 50px;
+    text-shadow: 2px 2px 5px #fff;
+  }
 
-#count {
-  font-size: 60px;
-  margin: 20px 0;
-  transition: transform 0.1s;
-}
+  #highScore {
+    font-size: 30px;
+    margin-bottom: 10px;
+    color: #006400;
+    text-shadow: 1px 1px 2px #fff;
+  }
 
-#count.click {
-  transform: scale(1.3);
-  color: #ff4500;
-}
+  #count {
+    font-size: 60px;
+    margin: 20px 0;
+    transition: transform 0.1s;
+    position: relative;
+  }
 
-#timer {
-  font-size: 30px;
-}
+  #count.click {
+    transform: scale(1.3);
+    color: #ff4500;
+  }
 
-#highScore {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ff4500;
-  margin-top: 15px;
-}
+  #timer {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
 
-button {
-  font-size: 20px;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(45deg, orange, gold);
-  color: white;
-  cursor: pointer;
-  margin: 5px;
-}
+  #result {
+    font-size: 30px;
+    margin: 20px 0;
+    color: #006400;
+  }
 
-#tpImage {
-  width: 150px;
-  margin-top: 20px;
-}
+  button {
+    font-size: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
 
-.addScore {
-  position: absolute;
-  font-size: 35px;
-  font-weight: bold;
-  color: yellow;
-  text-shadow: 2px 2px 4px black;
-  pointer-events: none;
-  animation: floatUp 0.5s forwards;
-}
+  #tpImage {
+    width: 150px;
+    margin-top: 20px;
+  }
 
-.bonusText {
-  position: absolute;
-  font-size: 38px;
-  font-weight: bold;
-  color: cyan;
-  text-shadow: 2px 2px 4px black;
-  pointer-events: none;
-  animation: floatUp 0.7s forwards;
-}
+  .bonusCircle {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00ffff, #0088ff);
+    box-shadow: 0 0 15px #00ffff;
+    cursor: pointer;
+    animation: pulse 1s infinite;
+    z-index: 1000;
+  }
 
-@keyframes floatUp {
-  0% { opacity:1; transform: translateY(0); }
-  100% { opacity:0; transform: translateY(-50px); }
-}
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
 
-#boost {
-  font-size: 24px;
-  color: cyan;
-}
+  .bonusText {
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
+    color: gold;
+    text-shadow: 1px 1px 3px #000;
+    pointer-events: none;
+    z-index: 1100;
+  }
 </style>
 </head>
-
 <body>
 
-<h1 id="gameTitle">滾筒衛生紙挑戰</h1>
-<img id="tpImage" src="https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180">
-
+<h1>滾筒衛生紙挑戰</h1>
 <div id="highScore">歷史最高分: 0</div>
+<img id="tpImage" src="https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180" alt="衛生紙">
+
 <div id="timer">時間: 10 秒</div>
 <div id="count">0</div>
-<div id="boost">倍率: x1</div>
 <div id="result"></div>
-
-<button onclick="startGame()">開始遊戲</button>
+<button id="startBtn">點我開始遊戲</button>
+<button onclick="startGame()">再玩一次</button>
 
 <audio id="sound" src="sound.mp3"></audio>
 <audio id="bonusSound" src="bonus.mp3"></audio>
 
 <script>
-localStorage.removeItem('tpHighScore');
-
 let count = 0;
 let time = 10;
 let playing = false;
-let boost = 1;
-let timer;
+let timerInterval;
 let highScore = 0;
+let boost = 1;
 
 const countEl = document.getElementById("count");
-const boostEl = document.getElementById("boost");
-const highScoreEl = document.getElementById("highScore");
+const timerEl = document.getElementById("timer");
+const resultEl = document.getElementById("result");
+const sound = document.getElementById("sound");
 const bonusSound = document.getElementById("bonusSound");
+const startBtn = document.getElementById("startBtn");
+const tpImage = document.getElementById("tpImage");
+const highScoreEl = document.getElementById("highScore");
 
-function startGame(){
+highScoreEl.innerText = `歷史最高分: ${highScore}`;
+
+startBtn.addEventListener("click", () => {
+  sound.play().catch(e => console.log("音效播放失敗:", e));
+  startGame();
+  startBtn.style.display = "none";
+});
+
+function startGame() {
   count = 0;
   time = 10;
-  boost = 1;
   playing = true;
-
+  boost = 1;
   countEl.innerText = count;
-  boostEl.innerText = "倍率: x1";
-  document.getElementById("result").innerText = "";
+  resultEl.innerText = '';
+  timerEl.innerText = `時間: ${time} 秒`;
 
-  clearInterval(timer);
-  timer = setInterval(()=>{
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
     time--;
-    document.getElementById("timer").innerText = `時間: ${time}`;
-    if(time<=0) endGame();
-  },1000);
+    timerEl.innerText = `時間: ${time} 秒`;
+    if(time <= 0){
+      endGame();
+    }
+  }, 1000);
+
+  setInterval(spawnCircle, 3000);
 }
 
-function endGame(){
+function endGame() {
   playing = false;
-  clearInterval(timer);
-
+  clearInterval(timerInterval);
   const cps = (count / 10).toFixed(2);
-  document.getElementById("result").innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
+  resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
 
   if(count > highScore){
     highScore = count;
     highScoreEl.innerText = `歷史最高分: ${highScore}`;
+    showBonusText(window.innerWidth/2, window.innerHeight/2, "新紀錄!!!", 1500);
   }
 }
 
-function addPoint(x, y, value=1){
-  count += value;
+function addPoint(x,y,val){
+  count += val;
   countEl.innerText = count;
 
-  // 點擊動畫
-  countEl.classList.add("click");
-  setTimeout(()=>countEl.classList.remove("click"),100);
-
-  // 飄字
-  let el = document.createElement("div");
-  el.innerText = "+"+value;
-  el.className = "addScore";
-  el.style.left = x+"px";
-  el.style.top = y+"px";
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),500);
-
-  // 每10特效
   if(count % 10 === 0){
-    const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
-    let index = Math.min(Math.floor(count/10)-1, messages.length-1);
-
-    let b = document.createElement("div");
-    b.innerText = messages[index];
-    b.className = "bonusText";
-    b.style.left = x+"px";
-    b.style.top = (y-50)+"px";
-    document.body.appendChild(b);
-    setTimeout(()=>b.remove(),700);
-
+    showBonusText(x,y, ["GOOD","GREAT","EXCELLENT"][Math.min(count/10-1,2)]);
     bonusSound.currentTime = 0;
-    bonusSound.play();
+    bonusSound.play().catch(e=>console.log(e));
   }
 }
 
-// 左鍵（主輸出🔥）
+function showBonusText(x,y,text,dur=800){
+  let t = document.createElement("div");
+  t.className = "bonusText";
+  t.innerText = text;
+  t.style.left = x + "px";
+  t.style.top = y + "px";
+  document.body.appendChild(t);
+  setTimeout(()=> t.remove(), dur);
+}
+
 document.addEventListener("click", e=>{
   if(playing){
     let gain = Math.floor(boost);
-    addPoint(e.pageX, e.pageY, gain);
-    boost = 1;
-    boostEl.innerText = "倍率: x1";
+    addPoint(e.pageX,e.pageY,gain);
+
+    countEl.classList.add("click");
+    setTimeout(() => countEl.classList.remove("click"), 100);
+
+    tpImage.src = "21e23f0c-e774-4ad8-8453-87b1cb6c6257.png";
+    setTimeout(()=> tpImage.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180",150);
+
+    sound.currentTime = 0;
+    sound.play().catch(e => console.log("音效播放失敗:", e));
   }
 });
 
-// 滾輪（充能）
+// 滾輪充能
 document.addEventListener("wheel", e=>{
-  e.preventDefault();
   if(playing){
-    boost = Math.min(boost + 0.5, 3);
-    boostEl.innerText = `倍率: x${boost.toFixed(1)}`;
+    boost = Math.min(boost + 0.1,3);
   }
-},{passive:false});
+});
 
-// 右鍵（輔助）
+// 禁用右鍵選單
 document.addEventListener("contextmenu", e=>{
   e.preventDefault();
-  if(playing){
-    addPoint(e.pageX, e.pageY, 2);
-  }
 });
+
+// BONUS圈圈 (右鍵點擊才能拿)
+function spawnCircle(){
+  if(!playing) return;
+  let circle = document.createElement("div");
+  circle.className = "bonusCircle";
+  let x = Math.random() * (window.innerWidth - 80);
+  let y = Math.random() * (window.innerHeight - 80);
+  circle.style.left = x + "px";
+  circle.style.top = y + "px";
+  document.body.appendChild(circle);
+
+  setTimeout(()=> circle.remove(),3000);
+
+  circle.addEventListener("contextmenu", e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    addPoint(x,y,5);
+    showBonusText(x,y,"BONUS!");
+    bonusSound.currentTime=0; bonusSound.play().catch(e=>console.log(e));
+    circle.remove();
+  });
+}
 </script>
 
 </body>
