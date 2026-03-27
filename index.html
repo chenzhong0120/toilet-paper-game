@@ -15,7 +15,7 @@ body {
   user-select: none;
 }
 
-/* ⭐ 標題（你原本那版） */
+/* 標題 */
 #gameTitle {
   font-size: 50px;
   background: linear-gradient(90deg, #ff8c00, #ffa500, #ff4500);
@@ -25,7 +25,7 @@ body {
   margin-top: 20px;
 }
 
-/* ⭐ 分數 */
+/* 分數 */
 #count {
   font-size: 60px;
   margin: 20px 0;
@@ -37,7 +37,7 @@ body {
   color: #ff4500;
 }
 
-/* ⭐ 高分 */
+/* 高分 */
 #highScore {
   font-size: 28px;
   font-weight: bold;
@@ -45,12 +45,12 @@ body {
   margin-top: 10px;
 }
 
-/* ⭐ 時間 */
+/* 時間 */
 #timer {
   font-size: 30px;
 }
 
-/* ⭐ 按鈕 */
+/* 按鈕 */
 button {
   font-size: 20px;
   padding: 10px 20px;
@@ -61,13 +61,13 @@ button {
   cursor: pointer;
 }
 
-/* ⭐ 衛生紙 */
+/* 衛生紙 */
 #tpImage {
   width: 150px;
   margin-top: 20px;
 }
 
-/* ⭐ +1 */
+/* +1 */
 .addScore {
   position: absolute;
   font-size: 35px;
@@ -77,7 +77,7 @@ button {
   animation: floatUp 0.5s forwards;
 }
 
-/* ⭐ GOOD那些 */
+/* GOOD */
 .bonusText {
   position: absolute;
   font-size: 38px;
@@ -87,13 +87,13 @@ button {
   animation: floatUp 0.7s forwards;
 }
 
-/* ⭐ 飄字動畫 */
+/* 飄字 */
 @keyframes floatUp {
   0% { opacity:1; transform: translateY(0); }
   100% { opacity:0; transform: translateY(-50px); }
 }
 
-/* ⭐ 圈圈 */
+/* 藍圈 */
 .bonusCircle {
   position: absolute;
   width: 80px;
@@ -104,13 +104,20 @@ button {
   animation: pulse 1s infinite;
 }
 
+/* 金圈 */
+.goldCircle {
+  background: radial-gradient(circle, gold, orange);
+  box-shadow: 0 0 20px gold;
+}
+
+/* 呼吸動畫 */
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
 
-/* ⭐ 倍率 */
+/* 倍率 */
 #boost {
   font-size: 24px;
   color: cyan;
@@ -130,9 +137,6 @@ button {
 <div id="result"></div>
 
 <button onclick="startGame()">開始遊戲</button>
-
-<audio id="sound" src="sound.mp3"></audio>
-<audio id="bonusSound" src="bonus.mp3"></audio>
 
 <script>
 let count = 0;
@@ -163,7 +167,7 @@ function startGame(){
     if(time<=0) endGame();
   },1000);
 
-  setInterval(spawnCircle, 3000);
+  spawnCircles();
 }
 
 function endGame(){
@@ -227,12 +231,35 @@ document.addEventListener("contextmenu", e=>{
   e.preventDefault();
 });
 
-/* BONUS圈圈（右鍵點） */
-function spawnCircle(){
-  if(!playing) return;
+/* ⭐ 固定圈圈系統 */
+function spawnCircles(){
 
+  let circles = [
+    "blue","blue","blue","gold"
+  ];
+
+  circles.sort(()=>Math.random()-0.5);
+
+  let i = 0;
+  let spawnTimer = setInterval(()=>{
+    if(i >= circles.length || !playing){
+      clearInterval(spawnTimer);
+      return;
+    }
+
+    createCircle(circles[i]);
+    i++;
+
+  },2000);
+}
+
+function createCircle(type){
   let c = document.createElement("div");
   c.className = "bonusCircle";
+
+  if(type === "gold"){
+    c.classList.add("goldCircle");
+  }
 
   let x = Math.random()*(window.innerWidth-80);
   let y = Math.random()*(window.innerHeight-80);
@@ -247,7 +274,13 @@ function spawnCircle(){
   c.addEventListener("contextmenu", e=>{
     e.preventDefault();
     e.stopPropagation();
-    addPoint(x,y,5);
+
+    if(type === "gold"){
+      addPoint(x,y,10);
+    }else{
+      addPoint(x,y,5);
+    }
+
     c.remove();
   });
 }
