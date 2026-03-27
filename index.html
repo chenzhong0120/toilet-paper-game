@@ -1,143 +1,3 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<title>滾筒衛生紙遊戲</title>
-
-<style>
-body {
-  background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
-  background-size: cover;
-  font-family: sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  user-select: none;
-}
-
-/* 標題 */
-#gameTitle {
-  font-size: 50px;
-  background: linear-gradient(90deg, #ff8c00, #ffa500, #ff4500);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-  margin-top: 20px;
-}
-
-/* 分數 */
-#count {
-  font-size: 60px;
-  margin: 20px 0;
-  transition: transform 0.1s;
-}
-
-#count.click {
-  transform: scale(1.3);
-  color: #ff4500;
-}
-
-/* 高分 */
-#highScore {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ff4500;
-  margin-top: 10px;
-}
-
-/* 時間 */
-#timer {
-  font-size: 30px;
-}
-
-/* 按鈕 */
-button {
-  font-size: 20px;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(45deg, orange, gold);
-  color: white;
-  cursor: pointer;
-}
-
-/* 衛生紙 */
-#tpImage {
-  width: 150px;
-  margin-top: 20px;
-}
-
-/* +1 */
-.addScore {
-  position: absolute;
-  font-size: 35px;
-  font-weight: bold;
-  color: yellow;
-  text-shadow: 2px 2px 4px black;
-  animation: floatUp 0.5s forwards;
-}
-
-/* GOOD */
-.bonusText {
-  position: absolute;
-  font-size: 38px;
-  font-weight: bold;
-  color: cyan;
-  text-shadow: 2px 2px 4px black;
-  animation: floatUp 0.7s forwards;
-}
-
-/* 飄字 */
-@keyframes floatUp {
-  0% { opacity:1; transform: translateY(0); }
-  100% { opacity:0; transform: translateY(-50px); }
-}
-
-/* 藍圈 */
-.bonusCircle {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #00ffff, #0088ff);
-  box-shadow: 0 0 15px #00ffff;
-  animation: pulse 1s infinite;
-}
-
-/* 金圈 */
-.goldCircle {
-  background: radial-gradient(circle, gold, orange);
-  box-shadow: 0 0 20px gold;
-}
-
-/* 呼吸動畫 */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-/* 倍率 */
-#boost {
-  font-size: 24px;
-  color: cyan;
-}
-</style>
-</head>
-
-<body>
-
-<h1 id="gameTitle">滾筒衛生紙挑戰</h1>
-<img id="tpImage" src="https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180">
-
-<div id="highScore">歷史最高分: 0</div>
-<div id="timer">時間: 10 秒</div>
-<div id="count">0</div>
-<div id="boost">倍率: x1</div>
-<div id="result"></div>
-
-<button onclick="startGame()">開始遊戲</button>
-
 <script>
 let count = 0;
 let time = 10;
@@ -146,9 +6,15 @@ let boost = 1;
 let timer;
 let highScore = 0;
 
+let circleTimer = null; // ⭐ 防止疊加
+
 const countEl = document.getElementById("count");
 const boostEl = document.getElementById("boost");
 const highScoreEl = document.getElementById("highScore");
+const tpImage = document.getElementById("tpImage");
+
+const sound = new Audio("sound.mp3");       // ⭐ 音效回來
+const bonusSound = new Audio("bonus.mp3");
 
 function startGame(){
   count = 0;
@@ -158,7 +24,6 @@ function startGame(){
 
   countEl.innerText = count;
   boostEl.innerText = "倍率: x1";
-  document.getElementById("result").innerText = "";
 
   clearInterval(timer);
   timer = setInterval(()=>{
@@ -167,12 +32,16 @@ function startGame(){
     if(time<=0) endGame();
   },1000);
 
+  // ⭐ 清掉舊的圈圈計時器
+  clearInterval(circleTimer);
+
   spawnCircles();
 }
 
 function endGame(){
   playing = false;
   clearInterval(timer);
+  clearInterval(circleTimer);
 
   if(count > highScore){
     highScore = count;
@@ -184,9 +53,21 @@ function addPoint(x, y, value=1){
   count += value;
   countEl.innerText = count;
 
+  // ⭐ 點擊動畫
   countEl.classList.add("click");
   setTimeout(()=>countEl.classList.remove("click"),100);
 
+  // ⭐ 衛生紙動畫（修回來🔥）
+  tpImage.src = "21e23f0c-e774-4ad8-8453-87b1cb6c6257.png";
+  setTimeout(()=>{
+    tpImage.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180";
+  },150);
+
+  // ⭐ 音效
+  sound.currentTime = 0;
+  sound.play().catch(()=>{});
+
+  // 飄字
   let el = document.createElement("div");
   el.innerText = "+"+value;
   el.className = "addScore";
@@ -195,6 +76,7 @@ function addPoint(x, y, value=1){
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),500);
 
+  // 每10次
   if(count % 10 === 0){
     const msgs = ["GOOD","GREAT","EXCELLENT"];
     let i = Math.min(Math.floor(count/10)-1, msgs.length-1);
@@ -206,6 +88,9 @@ function addPoint(x, y, value=1){
     b.style.top = (y-50)+"px";
     document.body.appendChild(b);
     setTimeout(()=>b.remove(),700);
+
+    bonusSound.currentTime = 0;
+    bonusSound.play().catch(()=>{});
   }
 }
 
@@ -226,28 +111,26 @@ document.addEventListener("wheel", e=>{
   }
 },{passive:false});
 
-/* 禁右鍵預設 */
+/* 禁右鍵 */
 document.addEventListener("contextmenu", e=>{
   e.preventDefault();
 });
 
-/* ⭐ 固定圈圈系統 */
+/* ⭐ 固定圈圈 */
 function spawnCircles(){
 
-  let circles = [
-    "blue","blue","blue","gold"
-  ];
-
-  circles.sort(()=>Math.random()-0.5);
+  let list = ["blue","blue","blue","gold"];
+  list.sort(()=>Math.random()-0.5);
 
   let i = 0;
-  let spawnTimer = setInterval(()=>{
-    if(i >= circles.length || !playing){
-      clearInterval(spawnTimer);
+
+  circleTimer = setInterval(()=>{
+    if(i >= list.length || !playing){
+      clearInterval(circleTimer);
       return;
     }
 
-    createCircle(circles[i]);
+    createCircle(list[i]);
     i++;
 
   },2000);
@@ -281,10 +164,10 @@ function createCircle(type){
       addPoint(x,y,5);
     }
 
+    bonusSound.currentTime = 0;
+    bonusSound.play().catch(()=>{});
+
     c.remove();
   });
 }
 </script>
-
-</body>
-</html>
