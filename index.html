@@ -14,7 +14,7 @@
     position: relative;
     overflow: hidden;
   }
-
+  
   /* 標題美化 */
   #gameTitle {
     font-size: 50px;
@@ -124,6 +124,9 @@
 
 <body>
 
+<img id="bonusTime" src="https://cdn-icons-png.flaticon.com/512/992/992700.png" 
+style="width:80px; position:absolute; display:none; cursor:pointer;">
+  
 <h1 id="gameTitle">滾筒衛生紙挑戰</h1>
 <img id="tpImage" src="https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180" alt="衛生紙">
 <div id="highScore">歷史最高分: 0</div>
@@ -156,6 +159,8 @@ const tpImg = document.getElementById("tpImage");
 const highScoreEl = document.getElementById("highScore");
 const startBtn = document.getElementById("startBtn");
 const gameTitle = document.getElementById("gameTitle");
+const bonusTime = document.getElementById("bonusTime");
+let bonusActive = false;
 
 startBtn.addEventListener("click", () => {
   sound.play().catch(e => console.log("音效播放失敗:", e));
@@ -177,6 +182,7 @@ function startGame() {
     timerEl.innerText = `時間: ${time} 秒`;
     if(time <= 0){
       endGame();
+    spawnBonus();
     }
   }, 1000);
 }
@@ -186,7 +192,56 @@ function endGame() {
   clearInterval(timerInterval);
   const cps = (count / 10).toFixed(2);
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
+  
+function spawnBonus(){
+  setInterval(() => {
+    if(!playing) return;
 
+    // 20% 機率出現
+    if(Math.random() < 0.2 && !bonusActive){
+
+      bonusActive = true;
+
+      // 隨機位置
+      const x = Math.random() * (window.innerWidth - 100);
+      const y = Math.random() * (window.innerHeight - 100);
+
+      bonusTime.style.left = x + 'px';
+      bonusTime.style.top = y + 'px';
+      bonusTime.style.display = 'block';
+
+      // 1秒後消失（沒點到就沒了）
+      setTimeout(() => {
+        bonusTime.style.display = 'none';
+        bonusActive = false;
+      }, 1000);
+    }
+
+  }, 1500); // 每1.5秒檢查一次
+}
+
+bonusTime.addEventListener("contextmenu", function(e){
+  e.preventDefault(); // ❗防止右鍵選單跳出
+
+  if(!playing) return;
+
+  time += 3; // 加3秒
+  timerEl.innerText = `時間: ${time} 秒`;
+
+  // 特效
+  let timeEl = document.createElement('div');
+  timeEl.innerText = '+3秒';
+  timeEl.className = 'bonusText';
+  timeEl.style.left = bonusTime.style.left;
+  timeEl.style.top = bonusTime.style.top;
+  document.body.appendChild(timeEl);
+
+  setTimeout(() => timeEl.remove(), 800);
+
+  bonusTime.style.display = 'none';
+  bonusActive = false;
+});
+  
   // 破紀錄特效
   if(count > highScore){
     highScore = count;
@@ -211,6 +266,10 @@ function endGame() {
   }
 }
 
+document.addEventListener("contextmenu", function(e){
+  if(playing) e.preventDefault();
+});
+  
 // 點擊事件
 document.addEventListener("click", function(e){
   if(playing){
