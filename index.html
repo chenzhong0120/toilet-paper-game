@@ -197,11 +197,6 @@ function startGame() {
 }
 
 function endGame() {
-  playing = false;
-  clearInterval(timerInterval);
-  const cps = (count / 10).toFixed(2);
-  resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
-
   if(count > highScore){
     highScore = count;
     highScoreEl.innerText = `歷史最高分: ${highScore}`;
