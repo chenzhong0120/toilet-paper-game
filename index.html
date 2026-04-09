@@ -67,7 +67,7 @@
   }
 
   #tpImage {
-    width: 300px;
+    width:  450px;
     margin-top: 20px;
     transition: transform 0.1s;
   }
@@ -149,7 +149,6 @@ let bonusBtnActive = false; // 目前是否有加時按鈕在畫面上
 const pullImages = [
   "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png",
   "output.png",
-  "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png",
 ];
 let pullIndex = 0;
   
@@ -234,8 +233,8 @@ document.addEventListener("click", function(e){
   setTimeout(() => countEl.classList.remove("click"), 100);
 
 tpImg.classList.add("pull");
-tpImg.src = pullImages[pullIndex % pullImages.length];
-pullIndex++;
+tpImg.src = pullImages[pullStep];
+pullStep = (pullStep + 1) % pullImages.length;
 setTimeout(() => {
   tpImg.src = "Lovepik_com-401649264-toilet-paper-pumping.png";
   tpImg.classList.remove("pull");
