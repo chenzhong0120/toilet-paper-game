@@ -138,14 +138,15 @@
 <audio id="sound" src="sound.mp3"></audio>
 
 <script>
-// 🔴 每次重整清除歷史分數
 localStorage.removeItem('tpHighScore');
 
 let count = 0;
 let time = 10;
 let playing = false;
 let timerInterval;
-let highScore = 0; // 因為重整清零
+let highScore = 0;
+let bonusBtnActive = false; // 目前是否有加時按鈕在畫面上
+
 document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
 
 const countEl = document.getElementById("count");
@@ -167,18 +168,26 @@ function startGame() {
   count = 0;
   time = 10;
   playing = true;
+  bonusBtnActive = false;
   countEl.innerText = count;
   resultEl.innerText = '';
   timerEl.innerText = `時間: ${time} 秒`;
+  timerEl.style.color = '';
 
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     time--;
     timerEl.innerText = `時間: ${time} 秒`;
-    if(time <= 0){
-      endGame();
-    }
+
+    // 時間快到時變紅警示
+    if(time <= 3) timerEl.style.color = '#ff2222';
+    else timerEl.style.color = '';
+
+    if(time <= 0) endGame();
   }, 1000);
+
+  // 5秒後開始隨機生成加時按鈕
+  setTimeout(spawnBonusBtn, 5000);
 }
 
 function endGame() {
@@ -186,8 +195,7 @@ function endGame() {
   clearInterval(timerInterval);
   const cps = (count / 10).toFixed(2);
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
-  
-  // 破紀錄特效
+
   if(count > highScore){
     highScore = count;
     highScoreEl.innerText = `歷史最高分: ${highScore}`;
@@ -202,70 +210,162 @@ function endGame() {
     bonusEl.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(bonusEl);
 
-    // 延長新紀錄特效停留時間到 2 秒
     setTimeout(() => {
-        highScoreEl.classList.remove("flash");
-        gameTitle.style.transform = "scale(1)";
-        bonusEl.remove();
+      highScoreEl.classList.remove("flash");
+      gameTitle.style.transform = "scale(1)";
+      bonusEl.remove();
     }, 2000);
   }
 }
 
-// 點擊事件
+// ======= 左鍵點擊 拉衛生紙 =======
 document.addEventListener("click", function(e){
-  if(playing){
-    count++;
+  if(!playing) return;
+  count++;
+  countEl.innerText = count;
+
+  countEl.classList.add("click");
+  setTimeout(() => countEl.classList.remove("click"), 100);
+
+  tpImg.classList.add("pull");
+  tpImg.src = "21e23f0c-e774-4ad8-8453-87b1cb6c6257.png";
+  setTimeout(() => {
+    tpImg.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180";
+    tpImg.classList.remove("pull");
+  }, 300);
+
+  let addEl = document.createElement('div');
+  addEl.innerText = '+1';
+  addEl.className = 'addScore';
+  addEl.style.left = `${e.pageX}px`;
+  addEl.style.top = `${e.pageY}px`;
+  document.body.appendChild(addEl);
+  setTimeout(() => addEl.remove(), 500);
+
+  if(count % 10 === 0){
+    const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
+    let index = Math.min(Math.floor(count / 10) - 1, messages.length - 1);
+
+    countEl.style.color = '#00ffff';
+    countEl.style.transform = 'scale(2)';
+
+    let bonusEl = document.createElement('div');
+    bonusEl.innerText = messages[index];
+    bonusEl.className = 'bonusText';
+    bonusEl.style.left = `${e.pageX}px`;
+    bonusEl.style.top = `${e.pageY - 50}px`;
+    document.body.appendChild(bonusEl);
+
+    setTimeout(() => {
+      countEl.style.color = '#000';
+      countEl.style.transform = 'scale(1)';
+      bonusEl.remove();
+    }, 800);
+  }
+
+  sound.currentTime = 0;
+  sound.play().catch(e => console.log("音效播放失敗:", e));
+});
+
+// ======= 右鍵：只有加時按鈕出現時才有效 =======
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+  if(!playing || !bonusBtnActive) return;
+
+  // 找到畫面上的加時按鈕並觸發
+  let btn = document.getElementById("bonusBtn");
+  if(btn) btn.click();
+});
+
+// ======= 滾輪：向下扣分懲罰 =======
+document.addEventListener("wheel", function(e){
+  if(!playing) return;
+  if(e.deltaY > 0){
+    count = Math.max(0, count - 1);
     countEl.innerText = count;
 
-    // 點擊動畫
-    countEl.classList.add("click");
-    setTimeout(() => countEl.classList.remove("click"), 100);
-
-    // 衛生紙拉出動畫
-    tpImg.classList.add("pull");
-    tpImg.src = "21e23f0c-e774-4ad8-8453-87b1cb6c6257.png";
-    setTimeout(() => {
-      tpImg.src = "https://tse4.mm.bing.net/th/id/OIP.JDTCmZzsc_j0FAy_C6KrJgHaHa?pid=Api&P=0&h=180";
-      tpImg.classList.remove("pull");
-    }, 300); 
-
-    // +1 飄字
-    let addEl = document.createElement('div');
-    addEl.innerText = '+1';
-    addEl.className = 'addScore';
-    addEl.style.left = `${e.pageX}px`;
-    addEl.style.top = `${e.pageY}px`;
-    document.body.appendChild(addEl);
-    setTimeout(() => addEl.remove(), 500);
-
-    // 每10的倍數特效 (漸進式文字)
-    if(count % 10 === 0){
-      const messages = ['GOOD!', 'GREAT!', 'EXCELLENT!', 'AWESOME!', 'AMAZING!'];
-      let index = Math.min(Math.floor(count / 10) - 1, messages.length - 1);
-      let text = messages[index];
-
-      countEl.style.color = '#00ffff';
-      countEl.style.transform = 'scale(2)';
-
-      let bonusEl = document.createElement('div');
-      bonusEl.innerText = text;
-      bonusEl.className = 'bonusText';
-      bonusEl.style.left = `${e.pageX}px`;
-      bonusEl.style.top = `${e.pageY - 50}px`;
-      document.body.appendChild(bonusEl);
-
-      setTimeout(() => {
-          countEl.style.color = '#000';
-          countEl.style.transform = 'scale(1)';
-          bonusEl.remove();
-      }, 800);
-    }
-
-    // 播放音效
-    sound.currentTime = 0;
-    sound.play().catch(e => console.log("音效播放失敗:", e));
+    let el = document.createElement('div');
+    el.innerText = '-1';
+    el.className = 'addScore';
+    el.style.left = `${window.innerWidth / 2}px`;
+    el.style.top = `${window.innerHeight / 2}px`;
+    el.style.color = '#ff4444';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 500);
   }
 });
+
+// ======= 隨機加時按鈕（左鍵或右鍵皆可點） =======
+function spawnBonusBtn(){
+  if(!playing || bonusBtnActive) return;
+
+  bonusBtnActive = true;
+
+  let btn = document.createElement('button');
+  btn.id = 'bonusBtn';
+  btn.innerText = '⚡ +5秒 快點我！';
+  btn.style.position = 'fixed';
+  btn.style.left = `${Math.random() * 60 + 15}%`;
+  btn.style.top = `${Math.random() * 50 + 20}%`;
+  btn.style.zIndex = '9999';
+  btn.style.background = 'linear-gradient(45deg, #ff8c00, #ffcc00)';
+  btn.style.fontSize = '18px';
+  btn.style.border = '3px solid #fff';
+  btn.style.boxShadow = '0 0 15px rgba(255,180,0,0.8)';
+  document.body.appendChild(btn);
+
+  // 2秒倒數條
+  let bar = document.createElement('div');
+  bar.style.cssText = `
+    position: fixed;
+    left: ${btn.style.left};
+    top: calc(${btn.style.top} + 45px);
+    width: 160px;
+    height: 6px;
+    background: #ddd;
+    border-radius: 4px;
+    z-index: 9999;
+    overflow: hidden;
+  `;
+  let fill = document.createElement('div');
+  fill.style.cssText = 'width:100%;height:100%;background:#ff8c00;transition:width 2s linear;';
+  bar.appendChild(fill);
+  document.body.appendChild(bar);
+  setTimeout(() => fill.style.width = '0%', 50);
+
+  let removeBtn = () => {
+    btn.remove();
+    bar.remove();
+    bonusBtnActive = false;
+    // 下次 5~9 秒後再出現
+    if(playing){
+      let next = (Math.random() * 4 + 5) * 1000;
+      setTimeout(spawnBonusBtn, next);
+    }
+  };
+
+  // 點擊加時（左鍵）
+  btn.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    time += 5;
+    timerEl.innerText = `時間: ${time} 秒`;
+
+    let el = document.createElement('div');
+    el.innerText = '⚡ +5秒！';
+    el.className = 'bonusText';
+    el.style.left = ev.pageX + 'px';
+    el.style.top = ev.pageY + 'px';
+    el.style.color = '#ffaa00';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+
+    removeBtn();
+  });
+
+  // 2秒後自動消失
+  setTimeout(removeBtn, 2000);
+}
+  
 </script>
 
 </body>
