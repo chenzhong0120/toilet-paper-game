@@ -147,6 +147,13 @@ let timerInterval;
 let highScore = 0;
 let bonusBtnActive = false; // 目前是否有加時按鈕在畫面上
 
+const pullImages = [
+  "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png",
+  "output.png",
+  "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png",
+];
+let pullIndex = 0;
+  
 document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
 
 const countEl = document.getElementById("count");
@@ -227,13 +234,14 @@ document.addEventListener("click", function(e){
   countEl.classList.add("click");
   setTimeout(() => countEl.classList.remove("click"), 100);
 
-  tpImg.classList.add("pull");
-  tpImg.src = "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png";
-  setTimeout(() => {
-    tpImg.src = "Lovepik_com-401649264-toilet-paper-pumping.png";
-    tpImg.classList.remove("pull");
-  }, 300);
-
+tpImg.classList.add("pull");
+tpImg.src = pullImages[pullIndex % pullImages.length];
+pullIndex++;
+setTimeout(() => {
+  tpImg.src = "Lovepik_com-401649264-toilet-paper-pumping.png";
+  tpImg.classList.remove("pull");
+}, 300);
+  
   let addEl = document.createElement('div');
   addEl.innerText = '+1';
   addEl.className = 'addScore';
