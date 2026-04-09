@@ -140,6 +140,11 @@
 <script>
 localStorage.removeItem('tpHighScore');
 
+@keyframes clockBob {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-10px) scale(1.05); }
+}
+  
 let count = 0;
 let time = 10;
 let playing = false;
@@ -304,18 +309,90 @@ document.addEventListener("wheel", function(e){
 // ======= 隨機加時按鈕（左鍵或右鍵皆可點） =======
 function spawnBonusBtn(){
   if(!playing || bonusBtnActive) return;
-
   bonusBtnActive = true;
+
+  const leftPct = Math.random() * 60 + 15;
+  const topPct = Math.random() * 40 + 15;
 
   let btn = document.createElement('button');
   btn.id = 'bonusBtn';
-  btn.innerText = '';  // 清空文字
-  btn.style.background = 'none';
-  btn.style.border = 'none';
-  btn.style.boxShadow = 'none';
-  btn.style.padding = '0';
-  btn.style.width = '80px';
-  btn.style.height = '80px';
+  btn.style.cssText = `
+    position: fixed;
+    left: ${leftPct}%;
+    top: ${topPct}%;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    z-index: 9999;
+  `;
+
+  let img = document.createElement('img');
+  img.src = 'lovepik-clock-png-image_400227948_wh1200.png';
+  img.style.cssText = `
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    animation: clockBob 0.6s infinite alternate;
+  `;
+  btn.appendChild(img);
+  document.body.appendChild(btn);
+
+  // 倒數條
+  let bar = document.createElement('div');
+  bar.style.cssText = `
+    position: fixed;
+    left: ${leftPct}%;
+    top: calc(${topPct}% + 125px);
+    width: 120px;
+    height: 6px;
+    background: #ddd;
+    border-radius: 4px;
+    z-index: 9999;
+    overflow: hidden;
+  `;
+  let fill = document.createElement('div');
+  fill.style.cssText = 'width:100%;height:100%;background:#ff8c00;transition:width 2s linear;';
+  bar.appendChild(fill);
+  document.body.appendChild(bar);
+  setTimeout(() => fill.style.width = '0%', 50);
+
+  let removed = false;
+  let removeBtn = () => {
+    if(removed) return;
+    removed = true;
+    btn.remove();
+    bar.remove();
+    bonusBtnActive = false;
+    if(playing){
+      let next = (Math.random() * 4 + 5) * 1000;
+      setTimeout(spawnBonusBtn, next);
+    }
+  };
+
+  btn.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    time += 5;
+    timerEl.innerText = `時間: ${time} 秒`;
+    timerEl.style.color = time <= 3 ? '#ff2222' : '';
+
+    let el = document.createElement('div');
+    el.innerText = '⚡ +5秒！';
+    el.className = 'bonusText';
+    el.style.left = ev.pageX + 'px';
+    el.style.top = ev.pageY + 'px';
+    el.style.color = '#ffaa00';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+
+    removeBtn();
+  });
+
+  setTimeout(removeBtn, 2000);
+}
 
 let img = document.createElement('img');
 img.src = 'lovepik-clock-png-image_400227948_wh1200.png';  // 👈 改這裡
