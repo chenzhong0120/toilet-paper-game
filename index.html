@@ -198,8 +198,6 @@ function startGame() {
 function endGame() {
   playing = false;
   clearInterval(timerInterval);
-  const cps = (count / 10).toFixed(2);
-  resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
   restartBtn.style.display = "inline-block";
 
   if(count > highScore){
