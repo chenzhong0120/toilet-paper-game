@@ -1,10 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
 <title>滾筒衛生紙遊戲</title>
 <style>
   body {
-    user-select: none;  /* 不可選文字 */
-    -webkit-user-select: none; /* Safari/Chrome */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     background: url("https://tse3.mm.bing.net/th/id/OIP.GnfwG69yyUEeitBhqpbj-AHaEK?pid=Api&P=0&h=180") no-repeat center center fixed;
     background-size: cover;
     font-family: 'Comic Sans MS', sans-serif;
@@ -14,15 +17,13 @@
     position: relative;
     overflow: hidden;
   }
-  
-  /* 標題美化 */
+
   #gameTitle {
     font-size: 50px;
     background: linear-gradient(90deg, #ff8c00, #ffa500, #ff4500);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: bold;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     margin-top: 20px;
     transition: transform 0.3s;
   }
@@ -67,12 +68,13 @@
   }
 
   #tpImage {
-  width: 450px;
-  max-height: 35vh;
-  object-fit: contain;
-  margin-top: 5px;
-  transition: transform 0.1s;
+    width: 450px;
+    max-height: 35vh;
+    object-fit: contain;
+    margin-top: 5px;
+    transition: transform 0.1s;
   }
+
   @keyframes pullDown {
     0% { transform: translateY(0); }
     50% { transform: translateY(30px); }
@@ -94,8 +96,9 @@
   #highScore.flash {
     transform: scale(1.3);
   }
+
   .addScore {
-    position: absolute;
+    position: fixed;
     font-weight: bold;
     color: #ffdd00;
     text-shadow: 2px 2px 4px #000;
@@ -110,12 +113,8 @@
     100% { opacity: 0; transform: translateY(-50px) scale(1); }
   }
 
-  @keyframes clockBob {
-    0% { transform: translateY(0) scale(1); }
-    100% { transform: translateY(-10px) scale(1.05); }
-  }
   .bonusText {
-    position: absolute;
+    position: fixed;
     font-weight: bold;
     color: #00ffff;
     text-shadow: 2px 2px 4px #000;
@@ -123,21 +122,25 @@
     font-size: 36px;
     animation: floatUp 0.8s forwards;
   }
+
+  @keyframes clockBob {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-10px) scale(1.05); }
+  }
 </style>
 </head>
 
 <body>
-  
+
 <h1 id="gameTitle">滾筒衛生紙挑戰</h1>
 <img id="tpImage" src="Lovepik_com-401649264-toilet-paper-pumping.png" alt="衛生紙">
 <div id="highScore">歷史最高分: 0</div>
-
 <div id="timer">時間: 10 秒</div>
 <div id="count">0</div>
 <div id="result"></div>
 
 <button id="startBtn">點我開始遊戲</button>
-<button onclick="startGame()">再玩一次</button>
+<button id="restartBtn" onclick="startGame()" style="display:none">再玩一次</button>
 
 <audio id="sound" src="sound.mp3"></audio>
 
@@ -151,8 +154,6 @@ let timerInterval;
 let highScore = 0;
 let bonusBtnActive = false;
 
-document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
-
 const countEl = document.getElementById("count");
 const timerEl = document.getElementById("timer");
 const resultEl = document.getElementById("result");
@@ -160,7 +161,10 @@ const sound = document.getElementById("sound");
 const tpImg = document.getElementById("tpImage");
 const highScoreEl = document.getElementById("highScore");
 const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
 const gameTitle = document.getElementById("gameTitle");
+
+document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
 
 startBtn.addEventListener("click", () => {
   sound.play().catch(e => console.log("音效播放失敗:", e));
@@ -177,6 +181,7 @@ function startGame() {
   resultEl.innerText = '';
   timerEl.innerText = `時間: ${time} 秒`;
   timerEl.style.color = '';
+  restartBtn.style.display = "none";
 
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
@@ -195,6 +200,7 @@ function endGame() {
   clearInterval(timerInterval);
   const cps = (count / 10).toFixed(2);
   resultEl.innerText = `你拉了 ${count} 張！手速 ${cps} CPS`;
+  restartBtn.style.display = "inline-block";
 
   if(count > highScore){
     highScore = count;
@@ -238,8 +244,8 @@ document.addEventListener("click", function(e){
   let addEl = document.createElement('div');
   addEl.innerText = '+1';
   addEl.className = 'addScore';
-  addEl.style.left = `${e.pageX}px`;
-  addEl.style.top = `${e.pageY}px`;
+  addEl.style.left = `${e.clientX}px`;
+  addEl.style.top = `${e.clientY}px`;
   document.body.appendChild(addEl);
   setTimeout(() => addEl.remove(), 500);
 
@@ -252,8 +258,8 @@ document.addEventListener("click", function(e){
     let bonusEl = document.createElement('div');
     bonusEl.innerText = messages[index];
     bonusEl.className = 'bonusText';
-    bonusEl.style.left = `${e.pageX}px`;
-    bonusEl.style.top = `${e.pageY - 50}px`;
+    bonusEl.style.left = `${e.clientX}px`;
+    bonusEl.style.top = `${e.clientY - 50}px`;
     document.body.appendChild(bonusEl);
 
     setTimeout(() => {
@@ -267,12 +273,9 @@ document.addEventListener("click", function(e){
   sound.play().catch(e => console.log("音效播放失敗:", e));
 });
 
-// ======= 右鍵：只有加時按鈕出現時才有效 =======
+// ======= 右鍵：阻止選單 =======
 document.addEventListener("contextmenu", function(e){
   e.preventDefault();
-  if(!playing || !bonusBtnActive) return;
-  let btn = document.getElementById("bonusBtn");
-  if(btn) btn.click();
 });
 
 // ======= 滾輪：向下扣分懲罰 =======
@@ -293,7 +296,7 @@ document.addEventListener("wheel", function(e){
   }
 });
 
-// ======= 隨機加時按鈕 =======
+// ======= 隨機加時按鈕（右鍵點擊） =======
 function spawnBonusBtn(){
   if(!playing || bonusBtnActive) return;
   bonusBtnActive = true;
@@ -323,7 +326,7 @@ function spawnBonusBtn(){
     width: 120px;
     height: 120px;
     pointer-events: none;
-    filter: none;
+    animation: clockBob 0.6s infinite alternate;
   `;
   btn.appendChild(img);
   document.body.appendChild(btn);
@@ -359,7 +362,9 @@ function spawnBonusBtn(){
     }
   };
 
-  btn.addEventListener("click", function(ev){
+  // 右鍵點擊加時
+  btn.addEventListener("contextmenu", function(ev){
+    ev.preventDefault();
     ev.stopPropagation();
     time += 5;
     timerEl.innerText = `時間: ${time} 秒`;
@@ -368,8 +373,8 @@ function spawnBonusBtn(){
     let el = document.createElement('div');
     el.innerText = '⚡ +5秒！';
     el.className = 'bonusText';
-    el.style.left = ev.pageX + 'px';
-    el.style.top = ev.pageY + 'px';
+    el.style.left = ev.clientX + 'px';
+    el.style.top = ev.clientY + 'px';
     el.style.color = '#ffaa00';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 800);
@@ -382,3 +387,4 @@ function spawnBonusBtn(){
 </script>
 
 </body>
+</html>
