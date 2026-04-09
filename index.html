@@ -303,16 +303,22 @@ function spawnBonusBtn(){
 
   let btn = document.createElement('button');
   btn.id = 'bonusBtn';
-  btn.innerText = '⚡ +5秒 快點我！';
-  btn.style.position = 'fixed';
-  btn.style.left = `${Math.random() * 60 + 15}%`;
-  btn.style.top = `${Math.random() * 50 + 20}%`;
-  btn.style.zIndex = '9999';
-  btn.style.background = 'linear-gradient(45deg, #ff8c00, #ffcc00)';
-  btn.style.fontSize = '18px';
-  btn.style.border = '3px solid #fff';
-  btn.style.boxShadow = '0 0 15px rgba(255,180,0,0.8)';
-  document.body.appendChild(btn);
+  btn.innerText = '';  // 清空文字
+  btn.style.background = 'none';
+  btn.style.border = 'none';
+  btn.style.boxShadow = 'none';
+  btn.style.padding = '0';
+  btn.style.width = '80px';
+  btn.style.height = '80px';
+
+let img = document.createElement('img');
+img.src = 'lovepik-clock-png-image_400227948_wh1200.png';  // 👈 改這裡
+img.style.width = '80px';
+img.style.height = '80px';
+img.style.cursor = 'pointer';
+img.style.filter = 'drop-shadow(0 0 10px rgba(255,180,0,0.9))';
+img.style.animation = 'floatUp 2s infinite alternate';
+btn.appendChild(img);
 
   // 2秒倒數條
   let bar = document.createElement('div');
