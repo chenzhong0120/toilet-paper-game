@@ -67,11 +67,12 @@
   }
 
   #tpImage {
-    width:  450px;
-    margin-top: 5px;
-    transition: transform 0.1s;
+  width: 450px;
+  max-height: 35vh;
+  object-fit: contain;
+  margin-top: 5px;
+  transition: transform 0.1s;
   }
-
   @keyframes pullDown {
     0% { transform: translateY(0); }
     50% { transform: translateY(30px); }
@@ -150,7 +151,7 @@ const pullImages = [
   "994D3E39-1FC8-4BC2-B43D-1405D662D00E.png",
   "output.png",
 ];
-let pullIndex = 0;
+let pullStep = 0;
   
 document.getElementById("highScore").innerText = `歷史最高分: ${highScore}`;
 
